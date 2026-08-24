@@ -1,0 +1,39 @@
+{
+  "outputDirectory": "worker-public",
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "rewrites": [
+    {
+      "source": "/t/:slug/:id/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/t/:slug/:id",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login/index.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register/index.html"
+    },
+    {
+      "source": "/forgot",
+      "destination": "/forgot/index.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/reset-password/index.html"
+    },
+    {
+      "source": "/verify-email",
+      "destination": "/verify-email/index.html"
+    }
+  ]
+}
