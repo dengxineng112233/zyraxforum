@@ -4,6 +4,10 @@
   "trailingSlash": true,
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api?path=:path*"
+    },
+    {
       "source": "/t/:slug/:id/",
       "destination": "/index.html"
     },

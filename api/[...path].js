@@ -139,7 +139,15 @@ async function readBody(req) {
 async function toFetchRequest(req) {
   const protocol = req.headers["x-forwarded-proto"] || "https";
   const host = req.headers.host || "localhost";
-  const url = `${protocol}://${host}${req.url}`;
+  const incomingUrl = new URL(`${protocol}://${host}${req.url}`);
+
+  if ((incomingUrl.pathname === "/api" || incomingUrl.pathname === "/api/") && incomingUrl.searchParams.has("path")) {
+    const routedPath = incomingUrl.searchParams.get("path") || "";
+    incomingUrl.pathname = `/api/${routedPath.replace(/^\/+/, "")}`;
+    incomingUrl.searchParams.delete("path");
+  }
+
+  const url = incomingUrl.toString();
   const init = { method: req.method, headers: rawHeaders(req) };
 
   if (req.method !== "GET" && req.method !== "HEAD") {
