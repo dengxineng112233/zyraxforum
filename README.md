@@ -2,6 +2,16 @@
 
 Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 
+## GitHub 上传重点
+
+GitHub 不保存空文件夹，所以 `schema/` 里已经放了实际文件：
+
+- `schema/d1.sql`：D1 初始化 SQL
+- `schema/01.sql`：同一份 SQL 的兼容别名
+- `schema/seed_admin.sql`：预置管理员 SQL
+
+如果你用 Cloudflare Dashboard 手动部署，直接复制 `worker-dashboard.js` 到 Worker。也可以直接部署到 Vercel：`api/[...path].js` 会把 `/api/*` 移植成 Vercel Serverless Function，数据库仍然连接 Cloudflare D1。
+
 ## 当前结构
 
 - `src/worker.js`：Worker 入口，统一处理 API 路由和帖子详情 fallback
@@ -14,11 +24,15 @@ Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 - `worker-public/reset-password/index.html`：重置密码 `/reset-password/`
 - `worker-public/assets/app.js`：前端逻辑，调用 `/api/*`
 - `worker-public/assets/style.css`：公共样式
+- `worker-public/schema/d1.sql`：静态可访问的 D1 初始化 SQL，访问 `/schema/d1.sql`
 - `functions/`：复用的 API handler 模块，由 `src/worker.js` import 后路由
 - `schema/d1.sql`：D1 全新库表结构
+- `schema/01.sql`：`schema/d1.sql` 的兼容别名
 - `schema/migration_auth_plus.sql`：旧库升级迁移
 - `schema/seed_admin.sql`：预置 admin 用户
 - `wrangler.toml`：Worker、Static Assets、D1 绑定配置
+- `worker-dashboard.js`：Cloudflare Dashboard 手动复制部署用的单文件 Worker
+- `api/[...path].js`：Vercel API 入口，使用 Cloudflare D1 HTTP API 访问同一个 D1 数据库
 
 ## 路由
 
@@ -30,6 +44,7 @@ Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 - `/reset-password/?token=...` -> 重置密码
 - `/t/<slug>/<post-id>/` -> 帖子详情，Worker fallback 到 `worker-public/index.html`
 - `/api/auth/register` -> 注册
+- `/api/auth/send-register-code` -> 发送注册邮箱验证码
 - `/api/auth/login` -> 登录
 - `/api/auth/logout` -> 退出
 - `/api/session` -> 当前用户
@@ -39,6 +54,33 @@ Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 - `/api/posts/:id/like` -> 点赞
 - `/api/admin/users` -> 管理员用户列表
 - `/api/admin/users/:id/ban` -> 封禁 / 解封
+
+## Vercel + Cloudflare D1
+
+Vercel 项目设置：
+
+```text
+Framework Preset: Other
+Build Command: npm run build
+Output Directory: worker-public
+Install Command: npm install
+```
+
+环境变量必须配置：
+
+```text
+CLOUDFLARE_ACCOUNT_ID=你的 Cloudflare Account ID
+CLOUDFLARE_D1_DATABASE_ID=你的 D1 database_id
+CLOUDFLARE_API_TOKEN=有 D1 Edit 权限的 Cloudflare API Token
+```
+
+部署后访问 `/api/health` 检查连接状态。
+
+## 如果看到 NOT_FOUND
+
+- Vercel `The page could not be found / NOT_FOUND`：检查 Output Directory 是否是 `worker-public`，以及项目根目录是否选到包含 `vercel.json` 的这一层。
+- Worker JSON `D1_NOT_BOUND`：Cloudflare Worker 没有绑定 D1，变量名必须叫 `FORUM_DB`。
+- `/api/health` 里 `usersTable: false`：D1 已连接但没初始化，执行 `schema/d1.sql`。
 
 ## 初始化
 
