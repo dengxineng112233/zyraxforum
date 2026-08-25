@@ -1,0 +1,16 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>注册 - CloudForum</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script defer src="/assets/app.js"></script>
+  
+</head>
+<body data-page="register">
+  <header class="topbar"><div class="container nav"><a class="brand" href="/"><span class="logo">CF</span><span>CloudForum</span></a><div class="nav-actions"><span id="currentUserLabel" class="pill" style="display:none"></span><a class="pill" href="/">论坛首页</a><a id="loginLink" class="pill" href="/login/">登录</a><button id="logoutBtn" class="pill" type="button" style="display:none">退出登录</button></div></div></header>
+  <main class="auth-wrap"><section class="panel auth-card"><h1>注册</h1><p class="lead">创建云端账号，注册后可直接使用。</p><form class="form" id="registerForm"><div class="field"><label for="username">用户名</label><input class="input" id="username" autocomplete="username" maxlength="24" placeholder="中文、字母、数字、_、-" required /></div><div class="field"><label for="email">邮箱</label><input class="input" id="email" type="email" autocomplete="email" required /></div><div class="field"><label for="password">密码</label><input class="input" id="password" type="password" autocomplete="new-password" minlength="8" required /></div><div class="field"><label for="confirmPassword">确认密码</label><input class="input" id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required /></div><button class="pill primary" type="submit">注册账号</button><div class="message" id="authMsg"></div><div class="hint">已有账号？<a href="/login/">去登录</a></div></form></section></main>
+</body>
+</html>
+

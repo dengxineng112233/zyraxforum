@@ -2,6 +2,16 @@
 
 Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 
+## GitHub 上传重点
+
+GitHub 不保存空文件夹，所以 `schema/` 里已经放了实际文件：
+
+- `schema/d1.sql`：D1 初始化 SQL
+- `schema/01.sql`：同一份 SQL 的兼容别名
+- `schema/seed_admin.sql`：预置管理员 SQL
+
+如果你用 Cloudflare Dashboard 手动部署，直接复制 `worker-dashboard.js` 到 Worker。也可以直接部署到 Vercel：`api/[...path].js` 会把 `/api/*` 移植成 Vercel Serverless Function，数据库仍然连接 Cloudflare D1。
+
 ## 当前结构
 
 - `src/worker.js`：Worker 入口，统一处理 API 路由和帖子详情 fallback
@@ -17,11 +27,12 @@ Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 - `worker-public/schema/d1.sql`：静态可访问的 D1 初始化 SQL，访问 `/schema/d1.sql`
 - `functions/`：复用的 API handler 模块，由 `src/worker.js` import 后路由
 - `schema/d1.sql`：D1 全新库表结构
-- `schema/01.sql`：`schema/d1.sql` 的兼容别名，方便 GitHub/网页端创建 schema 文件夹
+- `schema/01.sql`：`schema/d1.sql` 的兼容别名
 - `schema/migration_auth_plus.sql`：旧库升级迁移
 - `schema/seed_admin.sql`：预置 admin 用户
 - `wrangler.toml`：Worker、Static Assets、D1 绑定配置
 - `worker-dashboard.js`：Cloudflare Dashboard 手动复制部署用的单文件 Worker
+- `api/[...path].js`：Vercel API 入口，使用 Cloudflare D1 HTTP API 访问同一个 D1 数据库
 
 ## 路由
 
@@ -44,11 +55,32 @@ Cloudflare Worker + Static Assets + D1 的轻量论坛模板。
 - `/api/admin/users` -> 管理员用户列表
 - `/api/admin/users/:id/ban` -> 封禁 / 解封
 
-## 部署方式选择
+## Vercel + Cloudflare D1
 
-- **完整论坛**：用 Cloudflare Worker + D1。推荐直接复制 `worker-dashboard.js` 到 Cloudflare Worker，或用 Wrangler 部署 `src/worker.js`。
-- **GitHub 上传包**：`github/` 目录里已经放了 `worker-dashboard.js`、`schema/d1.sql`、`schema/01.sql` 和静态页面。
-- **Vercel**：项目根目录和 `github/` 目录都已内置 `api/index.js`，会把 `/api/*` 接到 Cloudflare D1 HTTP API。截图里的 Vercel `NOT_FOUND` 通常是旧部署、没上传 `api/`，或 rewrites 还没重新部署。
+Vercel 项目设置：
+
+```text
+Framework Preset: Other
+Build Command: npm run build
+Output Directory: worker-public
+Install Command: npm install
+```
+
+环境变量必须配置：
+
+```text
+CLOUDFLARE_ACCOUNT_ID=你的 Cloudflare Account ID
+CLOUDFLARE_D1_DATABASE_ID=你的 D1 database_id
+CLOUDFLARE_API_TOKEN=有 D1 Edit 权限的 Cloudflare API Token
+```
+
+部署后访问 `/api/health` 检查连接状态。
+
+## 如果看到 NOT_FOUND
+
+- Vercel `The page could not be found / NOT_FOUND`：检查 Output Directory 是否是 `worker-public`，以及项目根目录是否选到包含 `vercel.json` 的这一层。
+- Worker JSON `D1_NOT_BOUND`：Cloudflare Worker 没有绑定 D1，变量名必须叫 `FORUM_DB`。
+- `/api/health` 里 `usersTable: false`：D1 已连接但没初始化，执行 `schema/d1.sql`。
 
 ## 初始化
 
@@ -151,12 +183,12 @@ APP_BASE_URL = "https://你的-worker域名"
 
 ## 认证说明
 
-当前版本保留云端账号系统：
+当前版本保留云端账号系统，但已按你的要求去掉：
 
 - Turnstile 人机验证
-- 注册邮箱验证码
+- 邮箱验证码 / 邮箱验证门槛
 
-注册时需要先点“发送验证码”。如果没配置邮件服务，开发模式会在 API 返回里带 `devCode`，方便测试。注册成功后会自动登录，用户可以直接发帖、评论、点赞。找回密码功能仍保留，依赖邮箱发送重置链接；不配置邮件服务时，重置链接会显示在 Wrangler 日志和开发返回值里。
+现在注册后会直接创建云端账号并自动登录，用户可以直接发帖、评论、点赞。找回密码功能仍保留，依赖邮箱发送重置链接；不配置邮件服务时，重置链接会显示在 Wrangler 日志和开发返回值里。
 
 仍保留的安全项：
 

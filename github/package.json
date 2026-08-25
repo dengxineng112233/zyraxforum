@@ -1,0 +1,16 @@
+{
+  "name": "zyrax-forum",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"console.log('static build ok')\"",
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "d1:create": "npx wrangler d1 create cloudforum-db",
+    "d1:init:local": "npx wrangler d1 execute cloudforum-db --local --file=./schema/d1.sql",
+    "d1:init:remote": "npx wrangler d1 execute cloudforum-db --remote --file=./schema/d1.sql",
+    "seed:admin:local": "npx wrangler d1 execute cloudforum-db --local --file=./schema/seed_admin.sql",
+    "seed:admin:remote": "npx wrangler d1 execute cloudforum-db --remote --file=./schema/seed_admin.sql"
+  }
+}

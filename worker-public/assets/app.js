@@ -288,7 +288,7 @@ async function refreshList() {
     renderPosts();
   } catch (err) {
     const list = $("postList");
-    if (list) list.innerHTML = `<div class="empty">API 未连接：${safeText(err.message)}<br>Vercel 请检查 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_D1_DATABASE_ID / CLOUDFLARE_API_TOKEN，并确认 D1 已执行 schema/d1.sql。</div>`;
+    if (list) list.innerHTML = `<div class="empty">API 未连接：${safeText(err.message)}<br>Cloudflare Worker 请检查 FORUM_DB 绑定；Vercel 请检查 CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_D1_DATABASE_ID / CLOUDFLARE_API_TOKEN，并确认 D1 已执行 schema/d1.sql。</div>`;
   }
 }
 

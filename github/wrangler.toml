@@ -1,0 +1,17 @@
+﻿name = "cloudforum"
+main = "src/worker.js"
+compatibility_date = "2026-08-22"
+
+[assets]
+directory = "./worker-public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "FORUM_DB"
+database_name = "cloudforum-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[vars]
+ADMIN_USERNAMES = "admin"
+APP_BASE_URL = "http://127.0.0.1:8787"
+

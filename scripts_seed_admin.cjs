@@ -1,0 +1,23 @@
+﻿const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+const root = process.cwd();
+const username = process.argv[2] || 'admin';
+const password = process.argv[3] || 'DENG_800810';
+const email = process.argv[4] || 'admin@example.com';
+const iterations = 100000;
+const now = Date.now();
+const rand = (prefix) => `${prefix}_${now.toString(36)}_${crypto.randomBytes(16).toString('hex')}`;
+const userId = rand('u');
+const salt = rand('salt');
+const digest = crypto.pbkdf2Sync(password, salt, iterations, 32, 'sha256').toString('hex');
+const passwordHash = `pbkdf2_sha256$${iterations}$${digest}`;
+const esc = (s) => String(s).replace(/'/g, "''");
+const sql = `-- Replace admin user. Password hash generated locally; plaintext is not stored.\nDELETE FROM sessions WHERE user_id IN (SELECT id FROM users WHERE username = '${esc(username)}' OR email = '${esc(email)}');\nDELETE FROM users WHERE username = '${esc(username)}' OR email = '${esc(email)}';\n\nINSERT INTO users (id, username, email, email_verified, password_hash, salt, role, banned_at, banned_reason, created_at)\nVALUES ('${esc(userId)}', '${esc(username)}', '${esc(email)}', 1, '${esc(passwordHash)}', '${esc(salt)}', 'admin', NULL, NULL, ${now});\n`;
+const out = path.join(root, 'schema', 'seed_admin.sql');
+fs.writeFileSync(out, sql, 'utf8');
+console.log(out);
+console.log(`admin username=${username}`);
+console.log(`admin email=${email}`);
+console.log(`iterations=${iterations}`);
